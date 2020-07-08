@@ -32,10 +32,12 @@
     },
     "require-dev": {
         "doctrine/doctrine-fixtures-bundle": "^3.3",
+        "symfony/debug-bundle": "5.1.*",
         "symfony/debug-pack": "*",
         "symfony/maker-bundle": "^1.0",
-        "symfony/profiler-pack": "*",
-        "symfony/test-pack": "*"
+        "symfony/profiler-pack": "^1.0",
+        "symfony/test-pack": "*",
+        "symfony/var-dumper": "5.1.*"
     },
     "config": {
         "optimize-autoloader": true,
