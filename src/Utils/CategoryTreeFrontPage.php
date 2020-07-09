@@ -4,39 +4,72 @@
 namespace App\Utils;
 
 
+use App\Twig\AppExtension;
 use App\Utils\AbstractClasses\CategoryTreeAbstract;
 
 class CategoryTreeFrontPage extends CategoryTreeAbstract
 {
+    public $html_1 = '<ul>';
+    public $html_2 = '<li>';
+    public $html_3 = '<a href="';
+    public $html_4 = '">';
+    public $html_5 = '</a>';
+    public $html_6 = '</li>';
+    public $html_7 = '</ul>';
+
+    /**
+     * @var AppExtension
+     */
+    private $slugger;
+
+
+    public function getCategoryListAndParent(int $id) : string
+    {
+        $this->slugger = new AppExtension();
+        $parentData = $this->getMainParent($id);
+        $this->mainParentName = $parentData['name'];
+        $this->mainParentId = $parentData['id'];
+        $key = array_search($id, array_column($this->categoriesArrayFromDb, 'id'));
+        $this->currentCategoryName = $this->categoriesArrayFromDb[$key]['name'];
+
+        $categories_array = $this->buildTree($parentData['id']);
+        return $this->getCategoryList($categories_array);
+    }
 
     public function getCategoryList(array $categories_array)
     {
-        $this->categoryList .= '<ul>';
+        $this->categoryList .= $this->html_1;
 
         foreach ($categories_array as $value) {
-            $catName = $value['name'];
+
+            $catName = $this->slugger->slugify($value['name']);
             $url = $this->urlGenerator->generate('video_list', [
                 'categoryname' => $catName,
                 'id' => $value['id']
             ]);
-            $this->categoryList .= '<li>' . '<a href="' . $url . '">' . $catName . '</a>';
+
+            $this->categoryList .= $this->html_2 . $this->html_3 . $url . $this->html_4 . $catName . $this->html_5;
             if(!empty($value['children'])){
                 $this->getCategoryList($value['children']);
             }
+            $this->categoryList .= $this->html_6;
         }
 
-        $this->categoryList .= '</ul>';
+        $this->categoryList .= $this->html_7;
 
         return $this->categoryList;
     }
 
-//<li><a href="#">Funny</a></li>
-//<ul>
-//<li><a href="#">Surprising</a></li>
-//<li><a href="#">Exciting</a></li>
-//<ul>
-//<li><a href="#">Strange</a></li>
-//<li><a href="#">Relaxing</a></li>
-//</ul>
-//</ul>
+    public function getMainParent(int $id) : array
+    {
+        $key = array_search($id, array_column($this->categoriesArrayFromDb, 'id'));
+        if($this->categoriesArrayFromDb[$key]['parent_id'] != null){
+            return $this->getMainParent($this->categoriesArrayFromDb[$key]['parent_id']);
+        } else {
+            return [
+                'id' => $this->categoriesArrayFromDb[$key]['id'],
+                'name' => $this->categoriesArrayFromDb[$key]['name']
+            ];
+        }
+    }
 }
