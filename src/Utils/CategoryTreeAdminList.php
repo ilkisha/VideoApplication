@@ -16,7 +16,7 @@ class CategoryTreeAdminList extends CategoryTreeAbstract
     public $html_7 = '</a>';
     public $html_8 = '</li>';
     public $html_9 = '</ul>';
-    public $categoryList = '';
+    public $categoryList;
 
     public function getCategoryList(array $categories_array)
     {
