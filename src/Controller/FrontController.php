@@ -6,6 +6,7 @@ use App\Entity\Category;
 use App\Entity\Video;
 use App\Utils\CategoryTreeFrontPage;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -24,14 +25,18 @@ class FrontController extends AbstractController
      * @param $id
      * @param $page
      * @param CategoryTreeFrontPage $categories
+     * @param Request $request
      * @return Response
      */
-    public function videoList($id, $page, CategoryTreeFrontPage $categories): Response
+    public function videoList($id, $page, CategoryTreeFrontPage $categories, Request $request): Response
     {
         $categories->getCategoryListAndParent($id);
         $ids = $categories->getChildIds($id);
         $ids[] = $id;
-        $videos = $this->getDoctrine()->getRepository(Video::class)->findByChildIds($ids, $page);
+        $videos = $this
+            ->getDoctrine()
+            ->getRepository(Video::class)
+            ->findByChildIds($ids, $page, $request->get('sortby'));
 
         return $this->render('front/video_list.html.twig', [
             'subcategories' => $categories,
