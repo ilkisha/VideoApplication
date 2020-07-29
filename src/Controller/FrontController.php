@@ -6,6 +6,7 @@ use App\Entity\Category;
 use App\Entity\User;
 use App\Entity\Video;
 use App\Form\UserType;
+use App\Repository\VideoRepository;
 use App\Utils\CategoryTreeFrontPage;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -50,11 +51,17 @@ class FrontController extends AbstractController
     }
 
     /**
-     * @Route("/video-details", name="video_details")
+     * @Route("/video-details/{video}", name="video_details")
+     * @param VideoRepository $repo
+     * @param $video
+     * @return Response
      */
-    public function videoDetails()
+    public function videoDetails(VideoRepository $repo, $video): Response
     {
-        return $this->render('front/video_details.html.twig');
+        dump($repo->videoDetails($video));
+        return $this->render('front/video_details.html.twig', [
+            'video' => $repo->videoDetails($video)
+        ]);
     }
 
     /**
