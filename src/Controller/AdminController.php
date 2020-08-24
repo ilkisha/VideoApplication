@@ -8,10 +8,12 @@ use App\Form\CategoryType;
 use App\Utils\CategoryTreeAdminList;
 use App\Utils\CategoryTreeAdminOptionList;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use App\Entity\User;
+use App\Entity\Subscription;
 
 /**
  * @Route("/admin")
@@ -23,7 +25,9 @@ class AdminController extends AbstractController
      */
     public function index()
     {
-        return $this->render('admin/my_profile.html.twig');
+        return $this->render('admin/my_profile.html.twig', [
+            'subscription' => $this->getUser()->getSubscription()
+        ]);
     }
 
     /**
@@ -157,5 +161,25 @@ class AdminController extends AbstractController
         }
 
         return false;
+    }
+
+    /**
+     * @Route("/cancel-plan", name="cancel_plan")
+     */
+    public function cancelPlan(): RedirectResponse
+    {
+        $user = $this->getDoctrine()->getRepository(User::class)->find($this->getUser());
+
+        /** @var Subscription $subscription */
+        $subscription = $user->getSubscription();
+        $subscription->setValidTo(new \DateTime());
+        $subscription->setPaymentStatus(null);
+        $subscription->setPlan('canceled');
+
+        $em = $this->getDoctrine()->getManager();
+        $em->persist($subscription);
+        $em->flush();
+
+        return $this->redirectToRoute('admin_main_page');
     }
 }
